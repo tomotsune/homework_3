@@ -66,7 +66,7 @@ int String::compare(const String &st) const {
 }
 
 String &String::insert(size_t pos, const char *s) {
-    size_t len = strlen(_str);
+    size_t len = strlen(s);
     auto str{new char[_len + len + 1]};
     strcpy(str, _str);
     for (size_t i = _len; i >= pos; --i) {
@@ -102,12 +102,23 @@ String &String::operator+(const char *s) {
 }
 
 void String::operator+=(const String &st) {
-    strcat(_str, st._str);
+    auto str{new char[_len + st._len + 1]};
+    strcpy(str, _str);
+    strncpy(str + _len, st._str, st._len);
+    delete[] _str;
+    _len += st._len;
+    _str = str;
 }
 
 void String::operator+=(const char *s) {
-    _len+=strlen(s);
-    strcat(_str, s);
+
+    size_t len = strlen(s);
+    auto str{new char[_len + len + 1]};
+    strcpy(str, _str);
+    strncpy(str + _len, s, len);
+    delete[] _str;
+    _len += len;
+    _str = str;
 }
 
 String &String::operator=(const String &st) {   //assign a String to a String.
