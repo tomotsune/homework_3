@@ -15,57 +15,128 @@ int String::HowMany() {
 }
 
 //class methods.
-String::String(const char *s) {     //constructor String from C string.
-    len = std::strlen(s);     //set size.
-    str = new char[len + 1];        //allot storage.
-    std::strcpy(str, s);        //initialize pointer.
+String::String() : _len(4), _str(new char[1]) {      //default constructor.
+    _str[0] = '\0';        //default string.
+    ++num_string;
+}
+
+String::String(const char *s)
+        : _len(std::strlen(s)), _str(new char[_len + 1]) {     //constructor String from C string.
+    std::strcpy(_str, s);        //initialize pointer.
     ++num_string;       //set object count.
 }
 
-String::String() : len(4), str(new char[1]) {      //default constructor.
-    str[0] = '\0';        //default string.
-    ++num_string;
+String::String(const char *s, size_t pos, size_t n)
+        : _len(n), _str(new char[_len + 1]) {
+    std::strncpy(_str, s + pos, n);        //initialize pointer.
+    _str[_len] = '\0';
+    ++num_string;       //set object count.
 }
 
-String::String(const String &st) : len(st.len), str(new char[len + 1]) {
+String::String(const String &st)
+        : _len(st._len), _str(new char[_len + 1]) {
     ++num_string;
-    std::strcpy(str, st.str);       //copy string to new location.
+    std::strcpy(_str, st._str);       //copy string to new location.
 
+}
+
+String::String(const String &st, size_t pos, size_t n)
+        : _len(n), _str(new char[_len + 1]) {
+    ++num_string;
+    std::strncpy(_str, st._str + pos, n);
+    _str[_len] = '\0';
+}
+
+String::String(size_t n, char c)
+        : _len(n), _str(new char[_len + 1]) {
+    strnset(_str, c, n);
+    _str[_len] = '\0';
+}
+
+String &String::assign(const char *s) {
+    return this->operator=(s);
+}
+
+String &String::append(const char *s) {
+    return this->operator+(s);
+}
+
+int String::compare(const String &st) const {
+    return *this < st ? -1 : *this > st ? 1 : 0;
+}
+
+String &String::insert(size_t pos, const char *s) {
+    size_t len = strlen(_str);
+    auto str{new char[_len + len + 1]};
+    strcpy(str, _str);
+    for (size_t i = _len; i >= pos; --i) {
+        _str[i + len] = _str[i];
+    }
+    strncpy(str + pos, s, len);
+    delete[] _str;
+    _len += len;
+    _str = str;
+    return *this;
+}
+
+String String::substr(size_t pos, size_t n) {
+    char *str{};
+    strncpy(str, _str + pos, n);
+    return String(str);
 }
 
 String::~String() {     //necessary destructor.
     --num_string;       //required.
-    delete[] str;      //required.
+    delete[] _str;      //required.
 }
 
 //overloaded operator methods.
+String &String::operator+(const String &st) {
+    this->operator+=(st);
+    return *this;
+}
+
+String &String::operator+(const char *s) {
+    this->operator+=(s);
+    return *this;
+}
+
+void String::operator+=(const String &st) {
+    strcat(_str, st._str);
+}
+
+void String::operator+=(const char *s) {
+    _len+=strlen(s);
+    strcat(_str, s);
+}
+
 String &String::operator=(const String &st) {   //assign a String to a String.
     if (this == &st)return *this;
-    delete[] str;
-    len = st.len;
-    str = new char[len + 1];
-    std::strcpy(str, st.str);
+    delete[] _str;
+    _len = st._len;
+    _str = new char[_len + 1];
+    std::strcpy(_str, st._str);
     return *this;
 }
 
 String &String::operator=(const char *s) {  //assign a C string to a String.
-    delete[] str;
-    len = std::strlen(s);
-    str = new char[len + 1];
-    std::strcpy(str, s);
+    delete[] _str;
+    _len = std::strlen(s);
+    _str = new char[_len + 1];
+    std::strcpy(_str, s);
     return *this;
 }
 
 char &String::operator[](int i) {   //read-write char access for non-const String.
-    return str[i];
+    return _str[i];
 }
 
 const char &String::operator[](int i) const {   //read-only char access for const String.
-    return str[i];
+    return _str[i];
 }
 
 bool operator<(const String &lhs, const String &rhs) {
-    return (std::strcmp(lhs.str, rhs.str) < 0);
+    return (std::strcmp(lhs._str, rhs._str) < 0);
 }
 
 bool operator>(const String &lhs, const String &rhs) {
@@ -81,7 +152,7 @@ bool operator>=(const String &lhs, const String &rhs) {
 }
 
 bool operator==(const String &lhs, const String &rhs) {
-    return (std::strcmp(lhs.str, rhs.str) == 0);
+    return (std::strcmp(lhs._str, rhs._str) == 0);
 }
 
 bool operator!=(const String &lhs, const String &rhs) {
@@ -89,7 +160,7 @@ bool operator!=(const String &lhs, const String &rhs) {
 }
 
 std::ostream &operator<<(std::ostream &os, const String &string) {
-    os << "str: " << string.str;
+    os << string._str;
     return os;
 }
 
@@ -109,6 +180,18 @@ std::istream &operator>>(std::istream &is, String &st) {
         continue;
     return is;
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
